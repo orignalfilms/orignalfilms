@@ -2018,14 +2018,40 @@ const showreelVideos = [
   'ptoaGX3c95U',
 ];
 
+// Shuffle array
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+let playlist = shuffle(showreelVideos);
 let currentVideoIndex = 0;
 let showreelStarted = false;
 let showreelInterval = null;
 
+// Create a hidden preload iframe
+const preloadIframe = document.createElement('iframe');
+preloadIframe.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;';
+preloadIframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+preloadIframe.setAttribute('frameborder', '0');
+document.body.appendChild(preloadIframe);
+
+function getEmbedUrl(id) {
+  return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&start=8`;
+}
+
 function loadHeroVideo(index) {
-  const id = showreelVideos[index];
+  const id = playlist[index];
   const iframe = document.getElementById('heroVideo');
-  iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&start=5&loop=1&playlist=${id}`;
+  iframe.src = getEmbedUrl(id);
+
+  // Preload next video silently
+  const nextIndex = (index + 1) % playlist.length;
+  preloadIframe.src = getEmbedUrl(playlist[nextIndex]);
 }
 
 function startShowreel() {
@@ -2035,7 +2061,9 @@ function startShowreel() {
   overlay.classList.add('hidden');
   loadHeroVideo(0);
   showreelInterval = setInterval(() => {
-    currentVideoIndex = (currentVideoIndex + 1) % showreelVideos.length;
+    currentVideoIndex = (currentVideoIndex + 1) % playlist.length;
+    // Re-shuffle when we reach the end
+    if (currentVideoIndex === 0) playlist = shuffle(showreelVideos);
     loadHeroVideo(currentVideoIndex);
   }, 30000);
 }
@@ -2045,7 +2073,7 @@ document.getElementById('videoStartOverlay').addEventListener('click', startShow
 
 // Try autoplay on load — works on hosted domains
 window.addEventListener('load', () => {
-  setTimeout(startShowreel, 500);
+  setTimeout(startShowreel, 800);
 });
 
 </script>
