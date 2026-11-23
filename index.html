@@ -2025,7 +2025,7 @@ footer {
         </div>
         <div>
           <div class="label">Email</div>
-          <div class="value">orignalfilms09@gmail.com</div>
+          <div class="value"><a href="mailto:ogfilms09@gmail.com" style="color:inherit;text-decoration:none;">ogfilms09@gmail.com</a></div>
         </div>
       </div>
       <div class="contact-detail reveal">
@@ -2052,6 +2052,7 @@ footer {
       <h3>Book A Session</h3>
       <p class="form-sub">Fill out the form and we'll get back to you within 24 hours.</p>
       <form id="contactForm" action="https://formspree.io/f/mlgawlgk" method="POST">
+        <input type="hidden" name="_subject" value="New Booking Inquiry — originalfilms.ca">
         <div class="form-row">
           <div class="form-group">
             <label>Your Name</label>
@@ -2061,6 +2062,10 @@ footer {
             <label>Email</label>
             <input type="email" name="email" placeholder="john@example.com" required>
           </div>
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" name="phone" placeholder="+1 (604) 000-0000">
         </div>
         <div class="form-group">
           <label>Service Interested In</label>
@@ -2164,10 +2169,30 @@ filterBtns.forEach(btn => {
 });
 
 // FORM SUBMIT
-document.getElementById('contactForm').addEventListener('submit', (e) => {
+document.getElementById('contactForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  e.target.style.display = 'none';
-  document.getElementById('formSuccess').classList.add('show');
+  const form = e.target;
+  const btn = form.querySelector('.submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  try {
+    const res = await fetch(form.action, {
+      method: 'POST',
+      body: new FormData(form),
+      headers: { 'Accept': 'application/json' }
+    });
+    if (res.ok) {
+      form.reset();
+      form.style.display = 'none';
+      document.getElementById('formSuccess').classList.add('show');
+    } else {
+      throw new Error('Formspree error');
+    }
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Send Inquiry';
+    alert('Sorry, your message could not be sent. Please email us at ogfilms09@gmail.com or call +1 (778) 681-0906.');
+  }
 });
 // ==================== HERO SHOWREEL ====================
 const showreelVideos = [
